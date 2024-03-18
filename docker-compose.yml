@@ -1,0 +1,46 @@
+version: '3'
+
+services:
+  loadbalancer:
+    build:
+      context: .
+      dockerfile: loadbalancer.Dockerfile
+    ports:
+      - "9000:9000"
+    networks:
+      - distributed_network
+    container_name: my_loadbalancer
+
+  server1:
+    build:
+      context: .
+      dockerfile: server.Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - NAME=server1
+    depends_on:
+      - loadbalancer
+    networks:
+      - distributed_network
+    container_name: server1
+
+  server2:
+    build:
+      context: .
+      dockerfile: server.Dockerfile
+    ports:
+      - "5001:5001"
+    environment:
+      - PORT=5001
+      - NAME=server2
+    depends_on:
+      - loadbalancer
+      - server1
+    networks:
+      - distributed_network
+    container_name: server2
+
+networks:
+  distributed_network:
